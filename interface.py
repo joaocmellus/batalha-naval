@@ -1,63 +1,57 @@
 import os
-from player import Human
 
 class Interface:
-    def base(func):
-        def interface(**kwargs):
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print('         BATALHA NAVAL')
-            print('-------------------------------\n')
-            result = func(kwargs)
-            print('\n-------------------------------')
-            input('Pressionado ENTER...') 
-            return result
-    
-        return interface
+    def __init__(self):
+        self.title =  ' '*17 + 'BATALHA NAVAL'
+        self.divider = '-'*48
+        self.end_text = '  PRESSIONE ENTER'
 
-    @base
-    def show_map(players, turn, func):
-        '''Recebe o número do jogador, formata o campo e exibe na tela'''
-        letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i')
-        p1, p2 = players
-        # Vez do jogador 1
-        if turn == 0:
-            # Verfica se o jogador 1 é humano
-            if type(p1) == Human:
-                field1 = p1.field.show
-                field2 = p2.field.unshow
-            else:
-                field1 = p1.field.unshow
-                if type(p2) == Human:
-                    field2 = p2.field.show
-                else:
-                    field2 = p2.field.unshow
-        else:
-            if type(p2) == Human:
-                field2 = p2.field.show
-                field1 = p1.field.unshow
-            else:
-                field2 = p2.field.unshow
-                if type(p1) == Human:
-                    field1 = p1.field.show
-                else:
-                    field1 = p1.field.unshow
+    def top_screen(self, fields=None):
+        if fields:
+            field = format_map(fields)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print(self.title)
+        print(self.divider + '\n')
+        if fields:
+            print(field)
 
-        
-        for i, j in zip(letters, zip(field1, field2)):
-            line = i + ' '.join(j[0]) + (' ' * 8) + ' '.join(j[1])
-            print(line)
-        print()
+    def bottom_screen(self):
+        print('\n' + self.divider)
+        input(self.end_text)
 
-        return func()
+    def render(self, func, *args, field=None):
+        self.top_screen(field)
+        result = func(*args)
+        self.bottom_screen()
+        return result
 
-    @base
-    def show_field(player, func):
-        '''Exibe o campo na tela'''
-        letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i')
-        field = player.field.show
-        for i, j in zip(letters, field):
-            line = i + ' ' + ' '.join(j)
-            print(line)
-        print()
+def format_map(fields) -> str:
+    formated_fields = []
+    for field in fields:
+        formated_fields.append(format_field(field))
+    if len(formated_fields) == 1:
+        formated_fields[0] = list(map(lambda x: ' '*13 + x ,formated_fields[0]))
+    return concatenate_fields(formated_fields)
 
-        return func()
+def format_field(field:list) -> list:
+    """Recebe a matriz do campo e retorna uma lista de strings do campo"""
+    letters = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i')
+    numbers = [str(i)+' ' for i in range(1,10)]
+    final_field = []
+    final_field.append('  ' + ' '.join(letters))
+    for i, j in zip(numbers, field):
+        line = i + ' '.join(j)
+        final_field.append(line)
+    return final_field
+
+def concatenate_fields(fields:list) -> str:
+    concat_field = ['' for i in range(0,10)]
+    for i, field in enumerate(fields):
+        for j, line in enumerate(field):
+            if i > 0:
+                line = ' '*10 + line    
+            concat_field[j] += line
+    text = ''
+    for line in concat_field:
+        text += line + '\n'
+    return text
